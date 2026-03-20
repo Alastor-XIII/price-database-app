@@ -7,9 +7,9 @@ st.title("📊 Product Price Database")
 
 file_path = "data/products.csv"
 
-# Columns สำหรับ CSV (เรียงใหม่: model, supplier, brand)
+# Columns สำหรับ CSV (material หลัง product_name)
 columns = [
-    "category","product_name","model","supplier","brand","size_or_capacity",
+    "category","product_name","material","model","supplier","brand","size_or_capacity",
     "price","currency","last_update","status","description"
 ]
 
@@ -37,6 +37,14 @@ st.subheader("➕ Add Product")
 with st.form("add_form"):
     category = st.text_input("Category")
     product_name = st.text_input("Product Name")
+    
+    # material dropdown + เพิ่มค่าใหม่
+    existing_materials = sorted(df["material"].dropna().unique().tolist()) if "material" in df.columns else []
+    material_options = [""] + existing_materials + ["Add new..."]
+    material = st.selectbox("Material", material_options)
+    if material == "Add new...":
+        material = st.text_input("Enter new material")
+    
     model = st.text_input("Model")
     supplier = st.text_input("Supplier")
     brand = st.text_input("Brand")
@@ -52,6 +60,7 @@ with st.form("add_form"):
         new_row = {
             "category": category,
             "product_name": product_name,
+            "material": material,
             "model": model,
             "supplier": supplier,
             "brand": brand,
@@ -74,6 +83,9 @@ if selected_category:
     if selected_brand != "All":
         df_show = df_show[df_show["brand"] == selected_brand]
     st.subheader(f"Products in Category: {selected_category}")
-    st.dataframe(df_show[["model","supplier","brand","product_name","size_or_capacity","price","currency","last_update","status","description"]], use_container_width=True)
+    st.dataframe(
+        df_show[["model","supplier","brand","product_name","material","size_or_capacity","price","currency","last_update","status","description"]],
+        use_container_width=True
+    )
 else:
     st.info("Please select a category above to see products.")
