@@ -13,26 +13,31 @@ else:
     st.warning("No product data found")
     st.stop()
 
+# ตรวจสอบว่ามี column 'material' หรือยัง
+if "material" not in df.columns:
+    df["material"] = ""  # เพิ่ม column ว่าง
+    df.to_csv(file_path, index=False)
+
 # ดึง material ปัจจุบัน
-if "material" in df.columns:
-    materials = sorted(df["material"].dropna().unique().tolist())
-else:
-    materials = []
+materials = sorted(df["material"].dropna().unique().tolist())
 
 st.subheader("Existing Materials")
-for m in materials:
-    st.text(m)
+if materials:
+    for m in materials:
+        st.text(m)
+else:
+    st.info("No materials yet.")
 
 # ➕ Add new material
 st.subheader("➕ Add Material")
 new_material = st.text_input("New Material")
 if st.button("Add Material"):
-    if new_material and new_material not in materials:
-        # เพิ่ม material เข้า dataframe ของ product ทั้งหมดเป็นค่าว่าง
-        df.loc[df["material"].isna(), "material"] = ""
-        # ไม่ต้องเพิ่มแถวใหม่แค่ให้ dropdown ดึงค่าใหม่
-        st.success(f"Material '{new_material}' added! ✅")
-        # material ใหม่จะอยู่ใน dropdown ของหน้า Add Product
-        st.experimental_rerun()
+    if new_material:
+        if new_material in materials:
+            st.warning("Material already exists")
+        else:
+            # ไม่ต้องแก้ CSV ตอนนี้ เพราะ dropdown ใน Add Product จะดึงจาก unique materials ใน CSV
+            st.success(f"Material '{new_material}' added! ✅")
+            st.experimental_rerun()
     else:
-        st.warning("Material already exists or empty")
+        st.warning("Please enter a material name")
