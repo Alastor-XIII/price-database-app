@@ -1,4 +1,4 @@
-category,product_name,model,maker,size_or_capacity,supplier,price,currency,last_update,status,description
+category,product_name,model,supplier,brand,size_or_capacity,,price,currency,last_update,status,description
 Valve,Ball Valve,BV-100,TOA,2 inch,ABC Co.,1200,THB,2024-03-01,Purchased,Main line valve
 Pump,Water Pump,WP-200,Hitachi,5 HP,XYZ Ltd.,5000,THB,2025-01-15,Purchased,For cooling system
 Chemical,Sodium Hydroxide,,Dow,25 kg bag,DEF Co.,0,THB,,Not yet,Cleaning chemical
