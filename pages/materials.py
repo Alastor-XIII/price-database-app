@@ -31,13 +31,18 @@ else:
 # ➕ Add new material
 st.subheader("➕ Add Material")
 new_material = st.text_input("New Material")
+
+if "material_added" not in st.session_state:
+    st.session_state.material_added = False
+
 if st.button("Add Material"):
     if new_material:
         if new_material in materials:
             st.warning("Material already exists")
         else:
-            # ไม่ต้องแก้ CSV ตอนนี้ เพราะ dropdown ใน Add Product จะดึงจาก unique materials ใน CSV
+            st.session_state.material_added = True
             st.success(f"Material '{new_material}' added! ✅")
-            st.experimental_rerun()
+            # ไม่ต้อง rerun แบบตรงๆ
+            # dropdown ใน Add Product จะอัปเดตเมื่อโหลดหน้าใหม่
     else:
         st.warning("Please enter a material name")
