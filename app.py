@@ -9,8 +9,8 @@ file_path = "data/products.csv"
 
 # Columns สำหรับ CSV
 columns = [
-    "category","product_name","model","maker","size_or_capacity",
-    "supplier","price","currency","last_update","status","description"
+    "category","product_name","model","supplier","brand","size_or_capacity",
+    ,"price","currency","last_update","status","description"
 ]
 
 # โหลด CSV
