@@ -2,90 +2,37 @@ import streamlit as st
 import pandas as pd
 import os
 
-st.set_page_config(page_title="Product Price Database", layout="wide")
-st.title("📊 Product Price Database")
+st.title("📊 Product Price Database (Home)")
 
-file_path = "data/products.csv"
-
-# Columns สำหรับ CSV (material หลัง product_name)
-columns = [
-    "category","product_name","material","model","supplier","brand","size_or_capacity",
-    "price","currency","last_update","status","description"
-]
-
-# สร้าง CSV ว่างถ้ายังไม่มี
-if not os.path.exists(file_path):
-    pd.DataFrame(columns=columns).to_csv(file_path, index=False)
+product_file = "data/products.csv"
 
 # โหลด CSV
-df = pd.read_csv(file_path)
+if os.path.exists(product_file) and os.path.getsize(product_file) > 0:
+    df = pd.read_csv(product_file)
+else:
+    df = pd.DataFrame(columns=[
+        "category","product_name","material","model","brand","supplier",
+        "size_or_capacity","price","currency","last_update","status","description"
+    ])
 
 # 🔎 Filter
 st.subheader("🔎 Filter")
+
 col1, col2 = st.columns(2)
 
 with col1:
-    categories = [""] + sorted(df["category"].dropna().unique().tolist()) if "category" in df.columns else [""]
+    categories = ["All"] + sorted(df["category"].dropna().unique().tolist())
     selected_category = st.selectbox("Category", categories)
 
 with col2:
-    brands = ["All"] + sorted(df["brand"].dropna().unique().tolist()) if "brand" in df.columns else ["All"]
+    brands = ["All"] + sorted(df["brand"].dropna().unique().tolist())
     selected_brand = st.selectbox("Brand", brands)
 
-# ➕ Add Form
-st.subheader("➕ Add Product")
-with st.form("add_form"):
-    category = st.text_input("Category")
-    product_name = st.text_input("Product Name")
-    
-    # material dropdown + เพิ่มค่าใหม่
-    existing_materials = sorted(df["material"].dropna().unique().tolist()) if "material" in df.columns else []
-    material_options = [""] + existing_materials + ["Add new..."]
-    material = st.selectbox("Material", material_options)
-    if material == "Add new...":
-        material = st.text_input("Enter new material")
-    
-    model = st.text_input("Model")
-    supplier = st.text_input("Supplier")
-    brand = st.text_input("Brand")
-    size = st.text_input("Size / Capacity")
-    price = st.number_input("Price", min_value=0.0)
-    currency = st.text_input("Currency", value="THB")
-    last_update = st.date_input("Last Update")
-    status = st.selectbox("Status", ["Purchased", "Not yet"])
-    description = st.text_area("Description")
-
-    submitted = st.form_submit_button("Add")
-    if submitted:
-        new_row = {
-            "category": category,
-            "product_name": product_name,
-            "material": material,
-            "model": model,
-            "supplier": supplier,
-            "brand": brand,
-            "size_or_capacity": size,
-            "price": price,
-            "currency": currency,
-            "last_update": str(last_update),
-            "status": status,
-            "description": description
-        }
-        df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
-        df.to_csv(file_path, index=False)
-        st.success("Added! ✅")
-        st.experimental_rerun()
-
-# แสดง Table เฉพาะเมื่อเลือก Category
-if selected_category:
-    df_show = df.copy()
+df_show = df.copy()
+if selected_category != "All":
     df_show = df_show[df_show["category"] == selected_category]
-    if selected_brand != "All":
-        df_show = df_show[df_show["brand"] == selected_brand]
-    st.subheader(f"Products in Category: {selected_category}")
-    st.dataframe(
-        df_show[["model","supplier","brand","product_name","material","size_or_capacity","price","currency","last_update","status","description"]],
-        use_container_width=True
-    )
-else:
-    st.info("Please select a category above to see products.")
+if selected_brand != "All":
+    df_show = df_show[df_show["brand"] == selected_brand]
+
+st.subheader("Products Table")
+st.dataframe(df_show, use_container_width=True)
