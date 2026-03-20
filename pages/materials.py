@@ -6,12 +6,13 @@ st.title("🛠 Manage Materials")
 
 file_path = "data/materials.csv"
 
-# โหลด CSV หรือสร้างใหม่ถ้าไม่มี
-if os.path.exists(file_path):
-    df = pd.read_csv(file_path)
-else:
+# เช็คไฟล์และสร้างถ้ายังไม่มี
+if not os.path.exists(file_path) or os.path.getsize(file_path) == 0:
+    # สร้างไฟล์เปล่าพร้อม column header
     df = pd.DataFrame(columns=["material"])
     df.to_csv(file_path, index=False)
+else:
+    df = pd.read_csv(file_path)
 
 # แสดง material ปัจจุบัน
 st.subheader("Existing Materials")
