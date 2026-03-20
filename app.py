@@ -2,16 +2,19 @@ import streamlit as st
 import pandas as pd
 import os
 
+st.set_page_config(page_title="Product Price Database", layout="wide")
+
 st.title("📊 Product Price Database")
 
 file_path = "data/products.csv"
 
-# โหลดข้อมูล
+# Columns สำหรับ CSV
 columns = [
     "category","product_name","model","maker","size_or_capacity",
     "supplier","price","currency","last_update","status","description"
 ]
 
+# โหลดข้อมูล CSV
 if os.path.exists(file_path) and os.path.getsize(file_path) > 0:
     df = pd.read_csv(file_path)
 else:
@@ -30,14 +33,14 @@ with col2:
     makers = ["All"] + sorted(df["maker"].dropna().unique().tolist())
     selected_maker = st.selectbox("Maker", makers)
 
+# Apply filters
 df_show = df.copy()
-
 if selected_category != "All":
     df_show = df_show[df_show["category"] == selected_category]
-
 if selected_maker != "All":
     df_show = df_show[df_show["maker"] == selected_maker]
 
+# แสดงตาราง
 st.dataframe(df_show, use_container_width=True)
 
 # ➕ Add Form
@@ -76,13 +79,5 @@ with st.form("add_form"):
         df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
         df.to_csv(file_path, index=False)
 
-        st.success("Added! (ข้อมูลจะหายถ้า deploy ใหม่)")
-
-# ✏️ Edit
-st.subheader("✏️ Edit Table")
-
-edited_df = st.data_editor(df, num_rows="dynamic")
-
-if st.button("💾 Save Changes"):
-    edited_df.to_csv(file_path, index=False)
-    st.success("Saved!")
+        st.success("Added! ✅")
+        st.experimental_rerun()  # รีเฟรชหน้าอัตโนมัติ
