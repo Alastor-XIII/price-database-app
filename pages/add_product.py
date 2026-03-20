@@ -2,37 +2,65 @@ import streamlit as st
 import pandas as pd
 import os
 
-st.title("📊 Product Price Database (Home)")
+st.title("➕ Add Product")
 
 product_file = "data/products.csv"
+material_file = "data/materials.csv"
 
-# โหลด CSV
+# --- โหลด CSV หรือสร้างใหม่ถ้าไม่มี ---
 if os.path.exists(product_file) and os.path.getsize(product_file) > 0:
-    df = pd.read_csv(product_file)
+    products = pd.read_csv(product_file)
 else:
-    df = pd.DataFrame(columns=[
+    products = pd.DataFrame(columns=[
         "category","product_name","material","model","brand","supplier",
         "size_or_capacity","price","currency","last_update","status","description"
     ])
+    products.to_csv(product_file, index=False)
 
-# 🔎 Filter
-st.subheader("🔎 Filter")
+if os.path.exists(material_file) and os.path.getsize(material_file) > 0:
+    materials = pd.read_csv(material_file)
+else:
+    materials = pd.DataFrame(columns=["material"])
+    materials.to_csv(material_file, index=False)
 
-col1, col2 = st.columns(2)
+material_options = [""] + materials["material"].dropna().tolist()
 
-with col1:
-    categories = ["All"] + sorted(df["category"].dropna().unique().tolist())
-    selected_category = st.selectbox("Category", categories)
+# --- ฟอร์มเพิ่มสินค้า ---
+with st.form("add_form"):
+    category = st.text_input("Category")
+    product_name = st.text_input("Product Name")
+    material = st.selectbox("Material", material_options)
+    model = st.text_input("Model")
+    brand = st.text_input("Brand")
+    supplier = st.text_input("Supplier")
+    size = st.text_input("Size / Capacity")
+    price = st.number_input("Price", min_value=0.0)
+    currency = st.text_input("Currency", value="THB")
+    last_update = st.date_input("Last Update")
+    status = st.selectbox("Status", ["Purchased", "Not yet"])
+    description = st.text_area("Description")
 
-with col2:
-    brands = ["All"] + sorted(df["brand"].dropna().unique().tolist())
-    selected_brand = st.selectbox("Brand", brands)
+    submitted = st.form_submit_button("Add Product")
 
-df_show = df.copy()
-if selected_category != "All":
-    df_show = df_show[df_show["category"] == selected_category]
-if selected_brand != "All":
-    df_show = df_show[df_show["brand"] == selected_brand]
+    if submitted:
+        new_row = {
+            "category": category,
+            "product_name": product_name,
+            "material": material,
+            "model": model,
+            "brand": brand,
+            "supplier": supplier,
+            "size_or_capacity": size,
+            "price": price,
+            "currency": currency,
+            "last_update": str(last_update),
+            "status": status,
+            "description": description
+        }
+        # เพิ่มสินค้าใหม่
+        products = pd.concat([products, pd.DataFrame([new_row])], ignore_index=True)
+        products.to_csv(product_file, index=False)
 
-st.subheader("Products Table")
-st.dataframe(df_show, use_container_width=True)
+        st.success("Product added successfully! ✅")
+        st.write("Preview of added product:")
+        st.dataframe(pd.DataFrame([new_row]))
