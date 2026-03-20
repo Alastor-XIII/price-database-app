@@ -14,7 +14,7 @@ else:
     st.stop()
 
 # เลือก Category
-categories = ["All"] + sorted(df["category"].dropna().unique().tolist()) if "category" in df.columns else ["All"]
+categories = ["All"] + sorted(df["category"].dropna().unique().tolist())
 selected_category = st.selectbox("Select Category", categories)
 
 # Filter ตาม Category
@@ -23,17 +23,15 @@ if selected_category != "All":
 else:
     df_show = df.copy()
 
-# เลือก column และเรียงใหม่: model → supplier → brand → product_name → material → ...
-display_columns = ["model","supplier","brand","product_name","material","size_or_capacity","price","currency","last_update","status","description"]
-display_columns = [col for col in display_columns if col in df_show.columns]
-
 # แก้ไขตาราง
-edited_df = st.data_editor(df_show[display_columns], num_rows="dynamic")
+edited_df = st.data_editor(df_show, num_rows="dynamic")
 
 # Save
 if st.button("💾 Save Changes"):
     if selected_category != "All":
+        # ลบข้อมูลเก่าของ category นั้น
         df = df[df["category"] != selected_category]
+        # เพิ่มข้อมูลที่แก้แล้ว
         df = pd.concat([df, edited_df], ignore_index=True)
     else:
         df = edited_df.copy()
