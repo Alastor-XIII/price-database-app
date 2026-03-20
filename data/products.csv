@@ -1,0 +1,4 @@
+category,product_name,supplier,price,currency,last_update,status
+Valve,Ball Valve,ABC Co.,1200,THB,2024-03-01,Purchased
+Pump,Water Pump,XYZ Ltd.,5000,THB,2025-01-15,Purchased
+Chemical,Sodium Hydroxide,DEF Co.,0,THB,,Not yet
