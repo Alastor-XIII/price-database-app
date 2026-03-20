@@ -7,36 +7,54 @@ st.title("📊 Product Price Database")
 file_path = "data/products.csv"
 
 # โหลดข้อมูล
+columns = [
+    "category","product_name","model","maker","size_or_capacity",
+    "supplier","price","currency","last_update","status","description"
+]
+
 if os.path.exists(file_path) and os.path.getsize(file_path) > 0:
     df = pd.read_csv(file_path)
 else:
-    df = pd.DataFrame(columns=[
-        "category","product_name","supplier","price","currency","last_update","status"
-    ])
+    df = pd.DataFrame(columns=columns)
 
-# 🔎 Filter ตามหมวด
-st.subheader("🔎 Filter by Category")
-categories = df["category"].dropna().unique().tolist()
-selected_category = st.selectbox("Select category", ["All"] + categories)
+# 🔎 Filter
+st.subheader("🔎 Filter")
+
+col1, col2 = st.columns(2)
+
+with col1:
+    categories = ["All"] + sorted(df["category"].dropna().unique().tolist())
+    selected_category = st.selectbox("Category", categories)
+
+with col2:
+    makers = ["All"] + sorted(df["maker"].dropna().unique().tolist())
+    selected_maker = st.selectbox("Maker", makers)
+
+df_show = df.copy()
 
 if selected_category != "All":
-    df_show = df[df["category"] == selected_category]
-else:
-    df_show = df
+    df_show = df_show[df_show["category"] == selected_category]
+
+if selected_maker != "All":
+    df_show = df_show[df_show["maker"] == selected_maker]
 
 st.dataframe(df_show, use_container_width=True)
 
-# ➕ เพิ่มข้อมูล
-st.subheader("➕ Add New Product")
+# ➕ Add Form
+st.subheader("➕ Add Product")
 
 with st.form("add_form"):
     category = st.text_input("Category")
     product_name = st.text_input("Product Name")
+    model = st.text_input("Model")
+    maker = st.text_input("Maker")
+    size = st.text_input("Size / Capacity")
     supplier = st.text_input("Supplier")
     price = st.number_input("Price", min_value=0.0)
     currency = st.text_input("Currency", value="THB")
     last_update = st.date_input("Last Update")
     status = st.selectbox("Status", ["Purchased", "Not yet"])
+    description = st.text_area("Description")
 
     submitted = st.form_submit_button("Add")
 
@@ -44,20 +62,24 @@ with st.form("add_form"):
         new_row = {
             "category": category,
             "product_name": product_name,
+            "model": model,
+            "maker": maker,
+            "size_or_capacity": size,
             "supplier": supplier,
             "price": price,
             "currency": currency,
             "last_update": str(last_update),
-            "status": status
+            "status": status,
+            "description": description
         }
 
         df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
         df.to_csv(file_path, index=False)
 
-        st.success("Added successfully! Please refresh")
+        st.success("Added! (ข้อมูลจะหายถ้า deploy ใหม่)")
 
-# ✏️ แก้ไขข้อมูล (basic)
-st.subheader("✏️ Edit Data (manual)")
+# ✏️ Edit
+st.subheader("✏️ Edit Table")
 
 edited_df = st.data_editor(df, num_rows="dynamic")
 
