@@ -4,26 +4,19 @@ import os
 
 st.title("🛠 Manage Materials")
 
-file_path = "data/products.csv"
+file_path = "data/materials.csv"
 
-# โหลด CSV
-if os.path.exists(file_path) and os.path.getsize(file_path) > 0:
+# โหลด CSV หรือสร้างใหม่ถ้าไม่มี
+if os.path.exists(file_path):
     df = pd.read_csv(file_path)
 else:
-    st.warning("No product data found")
-    st.stop()
-
-# ตรวจสอบว่ามี column 'material' หรือยัง
-if "material" not in df.columns:
-    df["material"] = ""  # เพิ่ม column ว่าง
+    df = pd.DataFrame(columns=["material"])
     df.to_csv(file_path, index=False)
 
-# ดึง material ปัจจุบัน
-materials = sorted(df["material"].dropna().unique().tolist())
-
+# แสดง material ปัจจุบัน
 st.subheader("Existing Materials")
-if materials:
-    for m in materials:
+if not df.empty:
+    for m in df["material"].dropna().tolist():
         st.text(m)
 else:
     st.info("No materials yet.")
@@ -31,18 +24,13 @@ else:
 # ➕ Add new material
 st.subheader("➕ Add Material")
 new_material = st.text_input("New Material")
-
-if "material_added" not in st.session_state:
-    st.session_state.material_added = False
-
 if st.button("Add Material"):
     if new_material:
-        if new_material in materials:
+        if new_material in df["material"].values:
             st.warning("Material already exists")
         else:
-            st.session_state.material_added = True
+            df = pd.concat([df, pd.DataFrame([{"material": new_material}])], ignore_index=True)
+            df.to_csv(file_path, index=False)
             st.success(f"Material '{new_material}' added! ✅")
-            # ไม่ต้อง rerun แบบตรงๆ
-            # dropdown ใน Add Product จะอัปเดตเมื่อโหลดหน้าใหม่
     else:
         st.warning("Please enter a material name")
